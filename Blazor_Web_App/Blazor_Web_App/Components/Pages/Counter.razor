@@ -5,14 +5,26 @@
 <h1>Counter</h1>
 
 <p role="status">Current count: @currentCount</p>
+<p role="status">Double count: @doubleCount</p>
+<p role="status">Now: @dateTime</p>
 
 <button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
 
 @code {
-    private int currentCount = 0;
+    int currentCount = 0;
+    int doubleCount = 0;
+    DateTime dateTime = DateTime.Now;
+    
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+    }
 
     private void IncrementCount()
     {
         currentCount++;
+        doubleCount+=2;
+        dateTime = DateTime.Now;
     }
 }

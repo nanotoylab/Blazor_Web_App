@@ -2,17 +2,20 @@
 
 <PageTitle>LearnComponent</PageTitle>
 
-<h1>textBox</h1>
-
+<!-- TextBox -->
 <div>
-    <input type="text" @bind="txtName" placeholder="名前を入力してください。"/>
-    @(!string.IsNullOrEmpty(txtName) ? $"入力された名前：{txtName}" : "")
-    <p></p>
-</div>
+    <h1>TextBox</h1>
+        <div>
+            <input type="text" @bind="txtName" placeholder="名前を入力してください。"/>
+            @(!string.IsNullOrEmpty(txtName) ? $"入力された名前：{txtName}" : "")
+            <p></p>
+        </div>
 
-<div>
-<input type="text" @bind="txtNumber" placeholder="番号を入力してください。" />
-    @(!string.IsNullOrEmpty(txtNumber) ? $"入力された番号：{txtNumber}" : "")
+        <div>
+        <input type="text" @bind="txtNumber" placeholder="番号を入力してください。" />
+            @(!string.IsNullOrEmpty(txtNumber) ? $"入力された番号：{txtNumber}" : "")
+        </div>
+    <hr>
 </div>
 
 @code {
@@ -20,6 +23,39 @@
     private string txtNumber { get; set; } = "";
 }
 
+<!-- CheckBox -->
+<div>
+    <h1>CheckBox</h1>
+    <input type="checkbox" @bind="isChecked"/>
+    @(isChecked ? "checked!" : "not checked")
+    <hr>
+</div>
+
+@code {
+    private bool isChecked { get; set; }
+}
 
 
-<hr>
+<!-- DropDownList -->
+<div>
+    <h1>DropDownList</h1>
+    <select @bind="selectedKey">
+        <option value=""></option>
+        @foreach(var item in list)
+        {
+            <option value="@item.Key">@item.Value</option>
+        }
+    </select>
+    @(!string.IsNullOrEmpty(selectedKey) ? $"選択された項目：{list[selectedKey]}" : "")
+    <hr>
+</div>
+
+@code {
+    private string selectedKey = "";
+    private Dictionary<string, string> list = new Dictionary<string, string>()
+    {
+        {"key1", "value1"},
+        {"key2", "value2"},
+        {"key3", "value3"}
+    };
+}

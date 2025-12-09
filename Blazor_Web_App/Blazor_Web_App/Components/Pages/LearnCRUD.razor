@@ -1,0 +1,31 @@
+﻿@using Blazor_Web_App.Models
+@using Microsoft.EntityFrameworkCore
+@inject PubsDBContext pubsDBContext
+
+@page "/LearnCRUD"
+
+<PageTitle>LearnCRUD</PageTitle>
+
+<!-- TextBox -->
+<div>
+    <h1>TextBox</h1>
+        <div>
+@*             <input type="text" @bind="txtName" placeholder="名前を入力してください。"/>
+            @(!string.IsNullOrEmpty(txtName) ? $"入力された名前：{txtName}" : "")
+            <p></p>
+ *@        </div>
+    <hr>
+</div>
+
+@code {
+    private List<Test> Tests;
+
+    // 非同期処理でDBから取得
+    protected override async Task OnInitializedAsync()
+    {
+        Tests = await pubsDBContext.Tests.ToListAsync();
+    }
+
+
+}
+

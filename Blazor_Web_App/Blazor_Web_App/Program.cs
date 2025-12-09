@@ -1,10 +1,20 @@
 using Blazor_Web_App.Components;
+using Blazor_Web_App.Models;
+using Microsoft.EntityFrameworkCore;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+
+
+builder.Services.AddDbContext<PubsDBContext>(options =>
+{
+    // Ú‘±•¶š—ñ‚ğw’è
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+});
 
 var app = builder.Build();
 

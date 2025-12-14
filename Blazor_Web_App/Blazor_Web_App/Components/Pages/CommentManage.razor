@@ -7,16 +7,19 @@
 @page "/LearnCRUD/CommentList/CommentEdit/{ID:int}"
 <PageTitle>CommentEdit</PageTitle>
 
-<h3>コメント編集画面</h3>
 
 
 @if(ID == null)
 {
     // 追加モード
-    <h3>追加モード</h3>
+    <h3>コメント追加画面</h3>
+    <textarea @bind="record.Comment" rows="10" style="width:100%;"></textarea>
+    <button class="btn btn-primary" @onclick="CreateRecord">追加</button>
 }
 else
 {
+    <h3>コメント編集画面</h3>
+
     // 編集モード
     if (record == null)
     {
@@ -36,7 +39,7 @@ else
     [Parameter]
     public int? ID { get; set; }
 
-    private Test? record;
+    private Test record;
 
     [Inject]
     private NavigationManager navigationManager { get; set; } = null;
@@ -46,7 +49,14 @@ else
     {
         try
         {
-            record = await pubsDBContext.Tests.Where(a => a.Id.Equals(ID)).FirstOrDefaultAsync();
+            if (ID == null)
+            {
+                record = new Test();
+            }
+            else
+            {
+                record = await pubsDBContext.Tests.Where(a => a.Id.Equals(ID)).FirstOrDefaultAsync();
+            }
         }
         catch(Exception ex)
         {
@@ -56,39 +66,89 @@ else
         }
     }
 
-    private async Task UpdateRecord()
+    private async Task CreateRecord()
     {
-        if (record != null)
-        {
-            record.UpdateAt = DateTime.Now;
+        try
+        {   
+            // JS Interop を使用して、JavaScriptの confirmDelete 関数を呼び出す
+            bool confirmed = await JsRuntime.InvokeAsync<bool>(
+                "confirm", // JavaScript関数名
+                "レコードを追加してもよろしいですか？"
+            );
 
-            // DbContextは自動的に変更を追跡しているため、SaveChangesを呼ぶだけ
+            if (!confirmed) return;
+
+
+            record.Name = "test";
+            record.CreatedAt = DateTime.Now;
+            record.UpdateAt = DateTime.Now;
+            record.Comment = record.Comment; //@bind
+
+            pubsDBContext.Tests.Add(record);
             await pubsDBContext.SaveChangesAsync();
-            // 更新後の処理（例：一覧画面に戻るなど）
-            // NavigationManager.NavigateTo("/tests");
 
             navigationManager.NavigateTo("/LearnCRUD/CommentList");
+
+        }
+        catch(Exception ex)
+        {
+            // エラー処理（開発環境でのみ表示するなどの工夫をしてください）
+            record = new Test();
+            Console.WriteLine($"データの追加中にエラーが発生しました: {ex.Message}");
+        }
+    }
+
+    private async Task UpdateRecord()
+    {
+        try
+        {
+            if (record != null)
+            {
+                record.UpdateAt = DateTime.Now;
+
+                // DbContextは自動的に変更を追跡しているため、SaveChangesを呼ぶだけ
+                await pubsDBContext.SaveChangesAsync();
+                // 更新後の処理（例：一覧画面に戻るなど）
+                // NavigationManager.NavigateTo("/tests");
+
+                navigationManager.NavigateTo("/LearnCRUD/CommentList");
+            }
+        }
+        catch(Exception ex)
+        {
+            // エラー処理（開発環境でのみ表示するなどの工夫をしてください）
+            record = new Test();
+            Console.WriteLine($"データの更新中にエラーが発生しました: {ex.Message}");
         }
     }
 
     private async Task DeleteRecord()
     {
-        // JS Interop を使用して、JavaScriptの confirmDelete 関数を呼び出す
-        bool confirmed = await JsRuntime.InvokeAsync<bool>(
-            "confirmDelete", // JavaScript関数名
-            "レコードを削除してもよろしいですか？"
-        );
-
-        if (!confirmed) return;
-
-        var record = await pubsDBContext.Tests.Where(a => a.Id.Equals(ID)).FirstOrDefaultAsync();
-
-        if (record != null)
+        try
         {
-            pubsDBContext.Tests.Remove(record);
-            await pubsDBContext.SaveChangesAsync();
+            // JS Interop を使用して、JavaScriptの confirmDelete 関数を呼び出す
+            bool confirmed = await JsRuntime.InvokeAsync<bool>(
+                "confirm", // JavaScript関数名
+                "レコードを削除してもよろしいですか？"
+            );
 
-            navigationManager.NavigateTo("/LearnCRUD/CommentList");
+            if (!confirmed) return;
+
+            var record = await pubsDBContext.Tests.Where(a => a.Id.Equals(ID)).FirstOrDefaultAsync();
+
+            if (record != null)
+            {
+                pubsDBContext.Tests.Remove(record);
+                await pubsDBContext.SaveChangesAsync();
+
+                navigationManager.NavigateTo("/LearnCRUD/CommentList");
+            }
+        }
+        catch(Exception ex)
+        {
+            // エラー処理（開発環境でのみ表示するなどの工夫をしてください）
+            record = new Test();
+            Console.WriteLine($"データの削除中にエラーが発生しました: {ex.Message}");
         }
     }
 }

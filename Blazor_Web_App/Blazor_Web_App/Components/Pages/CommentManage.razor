@@ -1,0 +1,60 @@
+﻿@using Blazor_Web_App.Models
+@using Microsoft.EntityFrameworkCore
+@inject PubsDBContext pubsDBContext
+
+@page "/LearnCRUD/CommentList/CommentEdit/{ID:int}"
+<PageTitle>CommentEdit</PageTitle>
+
+<h3>コメント編集画面</h3>
+
+@if (record == null)
+{
+    <p><em>ロード中...</em></p>
+}
+else
+{
+    <textarea @bind="record.Comment" rows="10" style="width:100%;"></textarea>
+    <br />
+    <button class="btn btn-primary" @onclick="UpdateComment">更新</button>
+}
+
+
+@code {
+    [Parameter]
+    public int ID { get; set; }
+    private Test? record;
+
+    [Inject]
+    private NavigationManager navigationManager { get; set; } = null;
+
+    // 非同期処理でDBから取得
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            record = await pubsDBContext.Tests.Where(a => a.Id.Equals(ID)).FirstOrDefaultAsync();
+        }
+        catch(Exception ex)
+        {
+            // エラー処理（開発環境でのみ表示するなどの工夫をしてください）
+            record = new Test();
+            Console.WriteLine($"データの読み込み中にエラーが発生しました: {ex.Message}");
+        }
+    }
+
+    private async Task UpdateComment()
+    {
+        if (record != null)
+        {
+            record.UpdateAt = DateTime.Now;
+
+            // DbContextは自動的に変更を追跡しているため、SaveChangesを呼ぶだけ
+            await pubsDBContext.SaveChangesAsync();
+            // 更新後の処理（例：一覧画面に戻るなど）
+            // NavigationManager.NavigateTo("/tests");
+
+            navigationManager.NavigateTo("/LearnCRUD/CommentList");
+        }
+    }
+}
+

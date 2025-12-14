@@ -2,30 +2,64 @@
 @using Microsoft.EntityFrameworkCore
 @inject PubsDBContext pubsDBContext
 
-@page "/LearnCRUD"
+@page "/LearnCRUD/CommentList"
+<PageTitle>CommenList</PageTitle>
 
-<PageTitle>LearnCRUD</PageTitle>
+<h3>TESTテーブルの全レコード一覧</h3>
 
-<!-- TextBox -->
-<div>
-    <h1>TextBox</h1>
-        <div>
-@*             <input type="text" @bind="txtName" placeholder="名前を入力してください。"/>
-            @(!string.IsNullOrEmpty(txtName) ? $"入力された名前：{txtName}" : "")
-            <p></p>
- *@        </div>
-    <hr>
-</div>
+@if (Tests == null)
+{
+    // データがロードされるまでの表示
+    <p><em>データを読み込み中...</em></p>
+}
+else if (Tests.Count == 0)
+{
+    // レコードが0件だった場合の表示
+    <p>レコードはまだありません。</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>名前 (Name)</th>
+                <th>作成日時</th>
+                <th>更新日時</th>
+                <th>コメント (Comment)</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var record in Tests)
+            {
+                <tr>
+                    <td><a href="/LearnCRUD/CommentList/CommentEdit/@record.Id">@record.Id</a></td>
+                    <td>@record.Name</td>
+                    <td>@record.CreatedAt</td>
+                    <td>@record.UpdateAt</td>
+                    <td>@record.Comment</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
 
 @code {
-    private List<Test> Tests;
+    private List<Test>? Tests;
 
     // 非同期処理でDBから取得
     protected override async Task OnInitializedAsync()
     {
-        Tests = await pubsDBContext.Tests.ToListAsync();
+        try
+        {
+            Tests = await pubsDBContext.Tests.ToListAsync();
+        }
+        catch(Exception ex)
+        {
+            // エラー処理（開発環境でのみ表示するなどの工夫をしてください）
+            Tests = new List<Test>();
+            Console.WriteLine($"データの読み込み中にエラーが発生しました: {ex.Message}");
+        }
     }
-
-
 }
 

@@ -1,27 +1,41 @@
 ﻿@using Blazor_Web_App.Models
 @using Microsoft.EntityFrameworkCore
 @inject PubsDBContext pubsDBContext
+@inject IJSRuntime JsRuntime
 
+@page "/LearnCRUD/CommentList/CommentEdit"
 @page "/LearnCRUD/CommentList/CommentEdit/{ID:int}"
 <PageTitle>CommentEdit</PageTitle>
 
 <h3>コメント編集画面</h3>
 
-@if (record == null)
+
+@if(ID == null)
 {
-    <p><em>ロード中...</em></p>
+    // 追加モード
+    <h3>追加モード</h3>
 }
 else
 {
-    <textarea @bind="record.Comment" rows="10" style="width:100%;"></textarea>
-    <br />
-    <button class="btn btn-primary" @onclick="UpdateComment">更新</button>
+    // 編集モード
+    if (record == null)
+    {
+        <p><em>ロード中...</em></p>
+    }
+    else
+    {
+        <textarea @bind="record.Comment" rows="10" style="width:100%;"></textarea>
+        <br />
+        <button class="btn btn-primary" @onclick="UpdateRecord">更新</button>
+        <button class="btn btn-danger" @onclick="DeleteRecord">削除</button>
+    }
 }
 
 
 @code {
     [Parameter]
-    public int ID { get; set; }
+    public int? ID { get; set; }
+
     private Test? record;
 
     [Inject]
@@ -42,7 +56,7 @@ else
         }
     }
 
-    private async Task UpdateComment()
+    private async Task UpdateRecord()
     {
         if (record != null)
         {
@@ -52,6 +66,27 @@ else
             await pubsDBContext.SaveChangesAsync();
             // 更新後の処理（例：一覧画面に戻るなど）
             // NavigationManager.NavigateTo("/tests");
+
+            navigationManager.NavigateTo("/LearnCRUD/CommentList");
+        }
+    }
+
+    private async Task DeleteRecord()
+    {
+        // JS Interop を使用して、JavaScriptの confirmDelete 関数を呼び出す
+        bool confirmed = await JsRuntime.InvokeAsync<bool>(
+            "confirmDelete", // JavaScript関数名
+            "レコードを削除してもよろしいですか？"
+        );
+
+        if (!confirmed) return;
+
+        var record = await pubsDBContext.Tests.Where(a => a.Id.Equals(ID)).FirstOrDefaultAsync();
+
+        if (record != null)
+        {
+            pubsDBContext.Tests.Remove(record);
+            await pubsDBContext.SaveChangesAsync();
 
             navigationManager.NavigateTo("/LearnCRUD/CommentList");
         }

@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <None Include="efpt.config.json.user" />
+    <None Include="wwwroot\utility\confirmation.js" />
   </ItemGroup>
 
   <ItemGroup>

@@ -13,7 +13,7 @@ public partial class Test
 
     public DateTime? CreatedAt { get; set; }
 
-    public DateTime? UpdateAt { get; set; }
+    public DateTime? UpdatedAt { get; set; }
 
     public string Comment { get; set; }
 }

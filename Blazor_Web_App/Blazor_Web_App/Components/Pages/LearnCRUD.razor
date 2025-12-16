@@ -38,8 +38,8 @@ else
                     <td><a href="/LearnCRUD/CommentList/CommentEdit/@record.Id">@record.Id</a></td>
                     <td>@record.Name</td>
                     <td>@record.CreatedAt</td>
-                    <td>@record.UpdateAt</td>
-                    <td>@record.Comment</td>
+                    <td>@record.UpdatedAt</td>
+                    <td>@record.DisplayComment</td>
                 </tr>
             }
         </tbody>
@@ -47,19 +47,28 @@ else
 }
 
 @code {
-    private List<Test>? Tests;
+    private List<TestDisp>? Tests;
 
     // 非同期処理でDBから取得
     protected override async Task OnInitializedAsync()
     {
         try
         {
-            Tests = await pubsDBContext.Tests.ToListAsync();
+            Tests = await pubsDBContext.Tests.Select(a => new TestDisp
+            {
+                Id = a.Id,
+                Name = a.Name,
+                CreatedAt = a.CreatedAt,
+                UpdatedAt = a.UpdatedAt,
+                DisplayComment = (a.Comment != null && a.Comment.Length > 5)
+                                 ? (a.Comment.Substring(0, 5) + "...")
+                                 : (a.Comment ?? string.Empty)
+            }).ToListAsync();
         }
         catch(Exception ex)
         {
             // エラー処理（開発環境でのみ表示するなどの工夫をしてください）
-            Tests = new List<Test>();
+            Tests = new List<TestDisp>();
             Console.WriteLine($"データの読み込み中にエラーが発生しました: {ex.Message}");
         }
     }
@@ -67,6 +76,22 @@ else
     private void MoveToCommentEdit()
     {
         nav.NavigateTo("/LearnCRUD/CommentList/CommentEdit/");
+    }
+
+
+    public class TestDisp
+    {
+        public int Id { get; set; }
+
+        public string Name { get; set; } = string.Empty;
+
+        public DateTime? CreatedAt { get; set; }
+        
+        public DateTime? UpdatedAt { get; set; }
+
+        // 短く切り詰められたコメントを格納するフィールド
+        public string DisplayComment { get; set; } = string.Empty;
+
     }
 }
 

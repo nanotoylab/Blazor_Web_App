@@ -29,6 +29,7 @@ else
     {
         <textarea @bind="record.Comment" rows="10" style="width:100%;"></textarea>
         <br />
+        <button class="btn btn-dark" @onclick="PageBack">キャンセル</button>
         <button class="btn btn-primary" @onclick="UpdateRecord">更新</button>
         <button class="btn btn-danger" @onclick="DeleteRecord">削除</button>
     }
@@ -68,27 +69,24 @@ else
 
     private async Task CreateRecord()
     {
+        // JS Interop を使用して、JavaScriptの confirmDelete 関数を呼び出す
+        bool confirmed = await JsRuntime.InvokeAsync<bool>(
+            "yesNoConfirm", // JavaScript関数名
+            "レコードを追加してもよろしいですか？"
+        );
+
+        if (!confirmed) return;
+
         try
         {   
-            // JS Interop を使用して、JavaScriptの confirmDelete 関数を呼び出す
-            bool confirmed = await JsRuntime.InvokeAsync<bool>(
-                "confirm", // JavaScript関数名
-                "レコードを追加してもよろしいですか？"
-            );
-
-            if (!confirmed) return;
-
-
             record.Name = "test";
             record.CreatedAt = DateTime.Now;
-            record.UpdateAt = DateTime.Now;
+            record.UpdatedAt = DateTime.Now;
             record.Comment = record.Comment; //@bind
 
             pubsDBContext.Tests.Add(record);
             await pubsDBContext.SaveChangesAsync();
-
-            navigationManager.NavigateTo("/LearnCRUD/CommentList");
-
+            PageBack();
         }
         catch(Exception ex)
         {
@@ -104,14 +102,11 @@ else
         {
             if (record != null)
             {
-                record.UpdateAt = DateTime.Now;
+                record.UpdatedAt = DateTime.Now;
 
                 // DbContextは自動的に変更を追跡しているため、SaveChangesを呼ぶだけ
                 await pubsDBContext.SaveChangesAsync();
-                // 更新後の処理（例：一覧画面に戻るなど）
-                // NavigationManager.NavigateTo("/tests");
-
-                navigationManager.NavigateTo("/LearnCRUD/CommentList");
+                PageBack();
             }
         }
         catch(Exception ex)
@@ -124,24 +119,23 @@ else
 
     private async Task DeleteRecord()
     {
+        // JS Interop を使用して、JavaScriptの confirmDelete 関数を呼び出す
+        bool confirmed = await JsRuntime.InvokeAsync<bool>(
+            "yesNoConfirm", // JavaScript関数名
+            "レコードを削除してもよろしいですか？"
+        );
+
+        if (!confirmed) return;
+
         try
         {
-            // JS Interop を使用して、JavaScriptの confirmDelete 関数を呼び出す
-            bool confirmed = await JsRuntime.InvokeAsync<bool>(
-                "confirm", // JavaScript関数名
-                "レコードを削除してもよろしいですか？"
-            );
-
-            if (!confirmed) return;
-
             var record = await pubsDBContext.Tests.Where(a => a.Id.Equals(ID)).FirstOrDefaultAsync();
 
             if (record != null)
             {
                 pubsDBContext.Tests.Remove(record);
                 await pubsDBContext.SaveChangesAsync();
-
-                navigationManager.NavigateTo("/LearnCRUD/CommentList");
+                PageBack();
             }
         }
         catch(Exception ex)
@@ -150,6 +144,11 @@ else
             record = new Test();
             Console.WriteLine($"データの削除中にエラーが発生しました: {ex.Message}");
         }
+    }
+
+    private void PageBack()
+    {
+        navigationManager.NavigateTo("/LearnCRUD/CommentList");
     }
 }
 

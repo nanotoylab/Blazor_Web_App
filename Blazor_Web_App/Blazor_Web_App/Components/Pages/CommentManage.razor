@@ -13,7 +13,14 @@
 {
     // 追加モード
     <h3>コメント追加画面</h3>
+    <div class="form-group mb-3">
+        <label for="name">名前 (Name)</label>
+        <InputText @bind-Value="record.Name" class="form-control" />
+    </div>
+    
+    <label for="comment">コメント</label>
     <textarea @bind="record.Comment" rows="10" style="width:100%;"></textarea>
+    <button class="btn btn-dark" @onclick="PageBack">キャンセル</button>
     <button class="btn btn-primary" @onclick="CreateRecord">追加</button>
 }
 else
@@ -27,6 +34,12 @@ else
     }
     else
     {
+        <div class="form-group mb-3">
+            <label for="name">名前 (Name)</label>
+            <InputText @bind-Value="record.Name" class="form-control" />
+        </div>
+
+        <label for="comment">コメント</label>
         <textarea @bind="record.Comment" rows="10" style="width:100%;"></textarea>
         <br />
         <button class="btn btn-dark" @onclick="PageBack">キャンセル</button>
@@ -79,10 +92,10 @@ else
 
         try
         {   
-            record.Name = "test";
+            record.Name = record.Name;
             record.CreatedAt = DateTime.Now;
             record.UpdatedAt = DateTime.Now;
-            record.Comment = record.Comment; //@bind
+            record.Comment = record.Comment;
 
             pubsDBContext.Tests.Add(record);
             await pubsDBContext.SaveChangesAsync();
